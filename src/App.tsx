@@ -3,11 +3,13 @@ import {
   Button,
   Checkbox,
   Content,
+  defaultTheme,
   Divider,
   Flex,
   Heading,
   Item,
   ListView,
+  Provider,
   SearchField,
   Slider,
   Text,
@@ -169,80 +171,86 @@ function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #06111f 0%, #0f172a 18%, #111827 100%)', padding: '32px' }}>
-      <Content width="100%">
-        <Flex direction="column" gap="size-400">
-          <Flex justifyContent="space-between" alignItems="center" wrap>
-            <Heading level={1}>Freznel JSON Studio</Heading>
-            <Flex gap="size-200" alignItems="center">
-              <Text>{online ? 'Online' : 'Offline'} connection</Text>
-              <Button variant={online ? 'cta' : 'secondary'} onPress={handleSignIn}>
-                {user ? 'Authenticated' : 'Sign in'}
-              </Button>
-            </Flex>
-          </Flex>
-
-          <Divider size="M" />
-
-          <Flex gap="size-300" alignItems="start" wrap>
-            <View width="46%" minWidth="320px" backgroundColor="gray-100" padding="size-300" borderRadius="medium">
-              <Heading level={3}>Template editor</Heading>
-              <Flex gap="size-200" marginBottom="size-300" wrap>
-                {tabs.map((tab) => (
-                  <Button
-                    key={tab}
-                    variant={activeTab === tab ? 'cta' : 'secondary'}
-                    onPress={() => setActiveTab(tab)}
-                  >
-                    {tabLabels[tab]}
-                  </Button>
-                ))}
-              </Flex>
-
-              {Object.entries(currentForm).map(([key, value]) => renderField(key, value, key))}
-
-              <Flex gap="size-200" marginTop="size-300">
-                <Button variant="secondary" onPress={handleUndo}>Undo</Button>
-                <Button variant="secondary" onPress={handleRedo}>Redo</Button>
-                <Button variant="cta" onPress={handleSaveFiles} isDisabled={isSending}>
-                  {isSending ? 'Sending…' : 'Send to Server'}
+    <Provider theme={defaultTheme} minHeight="100vh">
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #06111f 0%, #0f172a 18%, #111827 100%)', padding: '32px' }}>
+        <Content width="100%">
+          <Flex direction="column" gap="size-400">
+            <Flex justifyContent="space-between" alignItems="center" wrap>
+              <Heading level={1}>Freznel JSON Studio</Heading>
+              <Flex gap="size-200" alignItems="center">
+                <Text>{online ? 'Online' : 'Offline'} connection</Text>
+                <Button variant={online ? 'cta' : 'secondary'} onPress={handleSignIn}>
+                  {user ? 'Authenticated' : 'Sign in'}
                 </Button>
               </Flex>
-              <Text marginTop="size-200">Status: {status}</Text>
-            </View>
+            </Flex>
 
-            <View width="46%" minWidth="320px" backgroundColor="gray-100" padding="size-300" borderRadius="medium">
-              <Heading level={3}>Preview</Heading>
-              <pre style={{ whiteSpace: 'pre-wrap', maxHeight: '540px', overflow: 'auto' }}>{JSON.stringify(currentJson, null, 2)}</pre>
-            </View>
+            <Divider size="M" />
+
+            <Flex gap="size-300" alignItems="start" wrap>
+              <View width="46%" minWidth="320px" backgroundColor="gray-100" padding="size-300" borderRadius="medium">
+                <Heading level={3}>Template editor</Heading>
+                <Flex gap="size-200" marginBottom="size-300" wrap>
+                  {tabs.map((tab) => (
+                    <Button
+                      key={tab}
+                      variant={activeTab === tab ? 'cta' : 'secondary'}
+                      onPress={() => setActiveTab(tab)}
+                    >
+                      {tabLabels[tab]}
+                    </Button>
+                  ))}
+                </Flex>
+
+                {Object.entries(currentForm).map(([key, value]) => renderField(key, value, key))}
+
+                <Flex gap="size-200" marginTop="size-300">
+                  <Button variant="secondary" onPress={handleUndo}>Undo</Button>
+                  <Button variant="secondary" onPress={handleRedo}>Redo</Button>
+                  <Button variant="cta" onPress={handleSaveFiles} isDisabled={isSending}>
+                    {isSending ? 'Sending…' : 'Send to Server'}
+                  </Button>
+                </Flex>
+                <Text marginTop="size-200">Status: {status}</Text>
+              </View>
+
+              <View width="46%" minWidth="320px" backgroundColor="gray-100" padding="size-300" borderRadius="medium">
+                <Heading level={3}>Preview</Heading>
+                <pre style={{ whiteSpace: 'pre-wrap', maxHeight: '540px', overflow: 'auto' }}>{JSON.stringify(currentJson, null, 2)}</pre>
+              </View>
+            </Flex>
+
+            <Flex gap="size-300" wrap>
+              <View flex={1} backgroundColor="gray-100" padding="size-300" borderRadius="medium">
+                <Heading level={3}>Saved drafts</Heading>
+                <ListView aria-label="saved drafts" selectionMode="single" selectedKeys={selectedDraftId ? [selectedDraftId] : []} onSelectionChange={(keys) => {
+                  const next = Array.from(keys)[0];
+                  const draft = historyItems.find((item) => item.id === next);
+                  if (draft) handleSelectDraft(draft);
+                }}>
+                  {historyItems.map((draft) => (
+                    <Item key={draft.id} textValue={`${draft.type} ${new Date(draft.createdAt).toLocaleTimeString()}`}>
+                      {draft.type} — {new Date(draft.createdAt).toLocaleTimeString()}
+                    </Item>
+                  ))}
+                </ListView>
+              </View>
+
+              <View flex={1} backgroundColor="gray-100" padding="size-300" borderRadius="medium">
+                <Heading level={3}>Session history</Heading>
+                <ListView aria-label="session history">
+                  {historyItems.slice(0, 8).map((entry) => (
+                    <Item key={`${entry.id}-history`} textValue={`${entry.type} ${entry.changedKey}`}>
+                      {entry.type}: {entry.changedKey}
+                    </Item>
+                  ))}
+                </ListView>
+              </View>
+            </Flex>
           </Flex>
-
-          <Flex gap="size-300" wrap>
-            <View flex={1} backgroundColor="gray-100" padding="size-300" borderRadius="medium">
-              <Heading level={3}>Saved drafts</Heading>
-              <ListView aria-label="saved drafts" selectionMode="single" selectedKeys={selectedDraftId ? [selectedDraftId] : []} onSelectionChange={(keys) => {
-                const next = Array.from(keys)[0];
-                const draft = historyItems.find((item) => item.id === next);
-                if (draft) handleSelectDraft(draft);
-              }}>
-                {historyItems.map((draft) => (
-                  <Item key={draft.id}>{draft.type} — {new Date(draft.createdAt).toLocaleTimeString()}</Item>
-                ))}
-              </ListView>
-            </View>
-
-            <View flex={1} backgroundColor="gray-100" padding="size-300" borderRadius="medium">
-              <Heading level={3}>Session history</Heading>
-              <ListView aria-label="session history">
-                {historyItems.slice(0, 8).map((entry) => (
-                  <Item key={`${entry.id}-history`}>{entry.type}: {entry.changedKey}</Item>
-                ))}
-              </ListView>
-            </View>
-          </Flex>
-        </Flex>
-      </Content>
-    </div>
+        </Content>
+      </div>
+    </Provider>
   );
 }
 
