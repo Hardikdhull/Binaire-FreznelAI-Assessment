@@ -1,0 +1,35 @@
+{
+  "name": "binaire-freznel-ai-assessment",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:client\" \"npm:dev:server\"",
+    "dev:client": "vite --host 0.0.0.0 --port 5173",
+    "dev:server": "node server/index.js",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "lint": "eslint . --ext .ts,.tsx,.js"
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.38.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "firebase": "^10.12.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.1.2",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  }
+}
